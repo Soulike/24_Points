@@ -1,0 +1,42 @@
+<RCC>
+    <qresource prefix="/">
+        <file>images/background.jpg</file>
+        <file>images/club1.png</file>
+        <file>images/club2.png</file>
+        <file>images/club3.png</file>
+        <file>images/club4.png</file>
+        <file>images/club5.png</file>
+        <file>images/club6.png</file>
+        <file>images/club7.png</file>
+        <file>images/club8.png</file>
+        <file>images/club9.png</file>
+        <file>images/diamond1.png</file>
+        <file>images/diamond2.png</file>
+        <file>images/diamond3.png</file>
+        <file>images/diamond4.png</file>
+        <file>images/diamond5.png</file>
+        <file>images/diamond6.png</file>
+        <file>images/diamond7.png</file>
+        <file>images/diamond8.png</file>
+        <file>images/diamond9.png</file>
+        <file>images/heart1.png</file>
+        <file>images/heart2.png</file>
+        <file>images/heart3.png</file>
+        <file>images/heart4.png</file>
+        <file>images/heart5.png</file>
+        <file>images/heart6.png</file>
+        <file>images/heart7.png</file>
+        <file>images/heart8.png</file>
+        <file>images/heart9.png</file>
+        <file>images/spade1.png</file>
+        <file>images/spade2.png</file>
+        <file>images/spade3.png</file>
+        <file>images/spade4.png</file>
+        <file>images/spade5.png</file>
+        <file>images/spade6.png</file>
+        <file>images/spade7.png</file>
+        <file>images/spade8.png</file>
+        <file>images/spade9.png</file>
+        <file>images/icon.ico</file>
+    </qresource>
+</RCC>

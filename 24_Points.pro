@@ -24,24 +24,23 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 
 SOURCES += \
-        main.cpp \
-        gamemainwindow.cpp \
-    gamemainwindow.cpp \
-    main.cpp \
-    gamemainwindow.cpp \
-    main.cpp
+        main.cpp\
+        gamemainwindow.cpp\
+    answerdialog.cpp \
+    errordialog.cpp
 
 HEADERS += \
-        gamemainwindow.h \
-    gamemainwindow.h \
-    gamemainwindow.h
+        gamemainwindow.h\
+    answerdialog.h \
+    errordialog.h
 
 FORMS += \
-        gamemainwindow.ui \
-    gamemainwindow.ui
+        gamemainwindow.ui\
+    answerdialog.ui \
+    errordialog.ui
 
 SUBDIRS += \
-    24_Points.pro
+    24_Points.pro\
 
 DISTFILES += \
     images/club1.png \
@@ -80,4 +79,10 @@ DISTFILES += \
     images/spade7.png \
     images/spade8.png \
     images/spade9.png \
-    README.md
+    README.md \
+    images/background.jpg
+
+RESOURCES += \
+    resource.qrc
+
+RC_ICONS = "images/icon.ico"
