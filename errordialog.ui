@@ -53,7 +53,7 @@
     </font>
    </property>
    <property name="text">
-    <string>同一张牌不能使用两次。</string>
+    <string/>
    </property>
    <property name="alignment">
     <set>Qt::AlignCenter</set>

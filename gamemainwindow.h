@@ -52,9 +52,11 @@ private:
 	double calculate(QString & equation);//主运算函数
 	void check_erase_signal();//检测是否需要覆盖运算符
 	void append(QString c);//在文本框内追加文字，改变数据
-	void showErrorDialog();
+	void showErrorDialog(QString str);
 
-	const int PRECISION = 11;//转换精度
+	const int PRECISION = 12;//转换精度
+	QVector<Card *> sequence;//输入顺序
+	int seq;
 };
 
 

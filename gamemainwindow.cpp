@@ -4,6 +4,7 @@
 #include<ctime>
 #include<QDebug>
 #include<cmath>
+#include<cctype>
 
 static bool isSignal(QChar c);//判断c是不是运算符
 static bool hasAnswer(double a, double b, double c, double d);
@@ -15,7 +16,8 @@ GameMainWindow::GameMainWindow(QWidget *parent) :
 	score = 0;
 	for(int i=0;i<4;i++)
 		cards.push_back(Card());
-
+	sequence.fill(nullptr,4);
+	seq=-1;
 	setStyleSheet(
 				"GameMainWindow{border-image: url(:/images/background.png);}"
 				"QLabel{color:white;}"
@@ -54,16 +56,16 @@ void GameMainWindow::putCards()
 	srand(time(nullptr));
 	do
 	{
-	for(int i=0;i<4;i++)
-		cards[i]=Card::getRandomCard();
-	while(cards[1] == cards[0])
-		cards[1] = Card::getRandomCard();
+		for(int i=0;i<4;i++)
+			cards[i]=Card::getRandomCard();
+		while(cards[1] == cards[0])
+			cards[1] = Card::getRandomCard();
 
-	while(cards[2] == cards[0] || cards[2]==cards[1])
-		cards[2] = Card::getRandomCard();
+		while(cards[2] == cards[0] || cards[2]==cards[1])
+			cards[2] = Card::getRandomCard();
 
-	while(cards[3] == cards[0] || cards[3] == cards[1] || cards[3] == cards[2])
-		cards[3] = Card::getRandomCard();
+		while(cards[3] == cards[0] || cards[3] == cards[1] || cards[3] == cards[2])
+			cards[3] = Card::getRandomCard();
 	}while(!hasAnswer(cards[0].getValue(),cards[1].getValue(),cards[2].getValue(),cards[3].getValue()));
 
 	ui->card1->setStyleSheet(cards[0].getBackground());
@@ -113,30 +115,62 @@ void GameMainWindow::clear_equation()
 	equation_for_show.clear();
 	for(int i=0;i<4;i++)
 		cards[i].checked = false;
+	sequence.fill(nullptr,4);
+	seq=-1;
 }
 
 void GameMainWindow::backspace()
 {
 	if(equation.size()>0)
 	{
-		equation_for_show.resize(equation.size()-1);
-		equation.resize(equation.size()-1);
-		ui->output->setText(equation_for_show);
+		if(!isSignal(equation[equation.size()-1]) && equation[equation.size()-1] != '(' && equation[equation.size()-1] !=')')
+		{
+			int i,j;
+			for(i=equation.size()-1;i>=0;i--)
+				if(isSignal(equation[i]))
+					break;
+
+			QString last_num;
+			for(j=i+1;j<equation.size();j++)
+				last_num+=equation[j];
+
+			equation_for_show.resize(equation.size()-(j - i - 1));
+			equation.resize(equation.size()-(j - i - 1));
+			ui->output->setText(equation_for_show);
+
+			for(int i=seq;i>=0;i--)
+				if(sequence[i]->value == last_num.toDouble())
+				{
+					sequence[i]->checked = false;
+					for(int j=i;j<sequence.size()-2;j++)
+					{
+						sequence[j]=sequence[j+1];
+					}
+					sequence[seq]=nullptr;
+					seq--;
+					break;
+				}
+		}
+		else
+		{
+			equation_for_show.resize(equation.size()-1);
+			equation.resize(equation.size()-1);
+			ui->output->setText(equation_for_show);
+		}
 	}
+
 }
 
 void GameMainWindow::input_plus()
 {
 	check_erase_signal();
-	if(!equation.isEmpty())
-		append("+");
+	append("+");
 }
 
 void GameMainWindow::input_minus()
 {
 	check_erase_signal();
-	if(!equation.isEmpty())
-		append("-");
+	append("-");
 }
 
 void GameMainWindow::input_times()
@@ -315,7 +349,7 @@ double GameMainWindow::calculate(QString & equation)
 
 void GameMainWindow::check_erase_signal()
 {
-	if(isSignal(equation[equation.size()-1]))
+	if(equation.size()>0&&isSignal(equation[equation.size()-1]))
 	{
 		equation_for_show.resize(equation.size()-1);
 		equation.resize(equation.size()-1);
@@ -329,10 +363,11 @@ void GameMainWindow::append(QString c)
 	ui->output->setText(equation_for_show);
 }
 
-void GameMainWindow::showErrorDialog()
+void GameMainWindow::showErrorDialog(QString  str)
 {
 	ErrorDialog * e = new ErrorDialog(this);
 	e->setModal(true);
+	e->changeLabel(str);
 	e->show();
 }
 
@@ -345,7 +380,7 @@ void GameMainWindow::equal()
 			{
 				throw "每张牌必须使用一次";
 			}
-		if(fabs(calculate(equation) - 24) < 10E-11)
+		if(fabs(calculate(equation) - 24.0) < 1E-6)
 		{
 			ui->score->setText(QString::number(++score));
 			ui->output->setText("恭喜你答对了！");
@@ -372,59 +407,132 @@ static bool isSignal(QChar c)
 
 void GameMainWindow::on_card1_clicked()
 {
+	for(int i=equation.size()-1;i>=0;i--)
+	{
+		if(equation[i] == '(')
+			continue;
+		if(isSignal(equation[i]))
+			break;
+		if(equation[i]>='0' && equation[i]<='9')
+		{
+			showErrorDialog("两张牌之间必须有运算符。");
+			return;
+		}
+		else
+		{
+			showErrorDialog("算式有误。");
+			return;
+		}
+	}
+
 	if(cards[0].checked == false)
 	{
 		append(QString::number(cards[0].getValue()));
 		cards[0].checked = true;
+		sequence[++seq] = &cards[0];
 	}
 	else
-		showErrorDialog();
+		showErrorDialog("同一张牌不能使用两次。");
 }
 
 void GameMainWindow::on_card2_clicked()
 {
+	for(int i=equation.size()-1;i>=0;i--)
+	{
+		if(equation[i] == '(')
+			continue;
+		if(isSignal(equation[i]))
+			break;
+		if(equation[i]>='0' && equation[i]<='9')
+		{
+			showErrorDialog("两张牌之间必须有运算符。");
+			return;
+		}
+		else
+		{
+			showErrorDialog("算式有误。");
+			return;
+		}
+	}
 	if(cards[1].checked == false)
 	{
 		append(QString::number(cards[1].getValue()));
 		cards[1].checked = true;
+		sequence[++seq] = &cards[1];
 	}
 	else
-		showErrorDialog();
+		showErrorDialog("同一张牌不能使用两次。");
 }
 
 void GameMainWindow::on_card3_clicked()
 {
+	for(int i=equation.size()-1;i>=0;i--)
+	{
+		if(equation[i] == '(')
+			continue;
+		if(isSignal(equation[i]))
+			break;
+		if(equation[i]>='0' && equation[i]<='9')
+		{
+			showErrorDialog("两张牌之间必须有运算符。");
+			return;
+		}
+		else
+		{
+			showErrorDialog("算式有误。");
+			return;
+		}
+	}
 	if(cards[2].checked == false)
 	{
 		append(QString::number(cards[2].getValue()));
 		cards[2].checked = true;
+		sequence[++seq] = &cards[2];
 	}
 	else
-		showErrorDialog();
+		showErrorDialog("同一张牌不能使用两次。");
 }
 
 void GameMainWindow::on_card4_clicked()
 {
+	for(int i=equation.size()-1;i>=0;i--)
+	{
+		if(equation[i] == '(')
+			continue;
+		if(isSignal(equation[i]))
+			break;
+		if(equation[i]>='0' && equation[i]<='9')
+		{
+			showErrorDialog("两张牌之间必须有运算符。");
+			return;
+		}
+		else
+		{
+			showErrorDialog("算式有误。");
+			return;
+		}
+	}
 	if(cards[3].checked == false)
 	{
 		append(QString::number(cards[3].getValue()));
 		cards[3].checked = true;
+		sequence[++seq] = &cards[3];
 	}
 	else
-		showErrorDialog();
+		showErrorDialog("同一张牌不能使用两次。");
 }
 
 static double plus(double a, double b)
 {
-	 return a+b;
+	return a+b;
 }
 static double minus(double a, double b)
 {
-	 return a-b;
+	return a-b;
 }
 static double times(double a, double b)
 {
-	 return a*b;
+	return a*b;
 }
 static double divide(double a, double b)
 {
@@ -448,23 +556,23 @@ static bool hasAnswer(double a, double b, double c, double d)//穷举所有情�
 			{
 				//((a#b)#c)#d
 				double answer = operators[k](operators[j](operators[i](a, b), c) , d);
-				if(fabs(answer -24)<10E-11)
+				if(fabs(answer -24.0)<1E-6)
 					return true;
 				//(a#(b#c))#d
 				answer = operators[k](operators[j](a, operators[i](b, c)) , d);
-				if(fabs(answer -24)<10E-11)
+				if(fabs(answer -24.0)<1E-6)
 					return true;
 				//a#((b#c)#d)
 				answer = operators[k](a, operators[j](operators[i](b, c) , d));
-				if(fabs(answer -24)<10E-11)
+				if(fabs(answer -24.0)<1E-6)
 					return true;
 				//(a#b)#(c#d)
 				answer = operators[k](operators[i](a, b), operators[j](c, d));
-				if(fabs(answer -24)<10E-11)
+				if(fabs(answer -24.0)<1E-6)
 					return true;
 				//a#(b#(c#d))
 				answer = operators[k](a, operators[j](b, operators[i](c, d)));
-				if(fabs(answer -24)<10E-11)
+				if(fabs(answer -24.0)<1E-6)
 					return true;
 			}
 		}
@@ -488,31 +596,31 @@ static QVector<QString> getAnswer(double a, double b, double c, double d)//穷�
 			{
 				//((a#b)#c)#d
 				double answer = operators[k](operators[j](operators[i](a, b), c) , d);
-				if(fabs(answer -24)<10E-11)
+				if(fabs(answer -24.0)<1E-6)
 				{
 					answers.push_back("(("+a_s+signal[i]+b_s+")"+signal[j]+c_s+")"+signal[k]+d_s);
 				}
 				//(a#(b#c))#d
 				answer = operators[k](operators[j](a, operators[i](b, c)) , d);
-				if(fabs(answer -24)<10E-11)
+				if(fabs(answer -24.0)<1E-6)
 				{
 					answers.push_back("("+a_s+signal[j]+"("+b_s+signal[i]+c_s+"))"+signal[k]+d_s);
 				}
 				//a#((b#c)#d)
 				answer = operators[k](a, operators[j](operators[i](b, c) , d));
-				if(fabs(answer -24)<10E-11)
+				if(fabs(answer -24.0)<1E-6)
 				{
 					answers.push_back(a_s+signal[k]+"(("+b_s+signal[i]+c_s+")"+signal[j]+d_s+")");
 				}
 				//(a#b)#(c#d)
 				answer = operators[k](operators[i](a, b), operators[j](c, d));
-				if(fabs(answer -24)<10E-11)
+				if(fabs(answer -24.0)<1E-6)
 				{
 					answers.push_back("("+a_s+signal[i]+b_s+")"+signal[k]+"("+c_s+signal[j]+d_s+")");
 				}
 				//a#(b#(c#d))
 				answer = operators[k](a, operators[j](b, operators[i](c, d)));
-				if(fabs(answer -24)<10E-11)
+				if(fabs(answer -24.0)<1E-6)
 				{
 					answers.push_back(a_s+signal[k]+"("+b_s+signal[j]+"("+c_s+signal[i]+d_s+"))");
 				}

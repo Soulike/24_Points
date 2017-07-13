@@ -13,12 +13,17 @@ ErrorDialog::ErrorDialog(QWidget *parent) :
 				"QPushButton:pressed{font-size: 17px;}"
 				"QPushButton:hover{background-color:red;}"
 				"QLabel{color:black;}"
-				  );
+				);
 }
 
 ErrorDialog::~ErrorDialog()
 {
 	delete ui;
+}
+
+void ErrorDialog::changeLabel(QString str)
+{
+	ui->label->setText(str);
 }
 
 void ErrorDialog::on_pushButton_clicked()

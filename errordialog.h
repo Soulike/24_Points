@@ -14,6 +14,7 @@ class ErrorDialog : public QDialog
 public:
 	explicit ErrorDialog(QWidget *parent = 0);
 	~ErrorDialog();
+	void changeLabel(QString  str);
 
 private slots:
 	void on_pushButton_clicked();

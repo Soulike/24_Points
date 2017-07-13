@@ -14,7 +14,7 @@ AnswerDialog::AnswerDialog(QWidget *parent) :
 				"QPushButton{border-radius:5px;border:1px solid gray;font-size:25px;}"
 				"QPushButton:pressed{font-size: 23px;}"
 				"QPushButton:hover{background-color:red;}"
-				  );
+				);
 }
 
 AnswerDialog::~AnswerDialog()
