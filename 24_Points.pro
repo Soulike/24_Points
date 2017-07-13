@@ -80,7 +80,7 @@ DISTFILES += \
     images/spade8.png \
     images/spade9.png \
     README.md \
-    images/background.jpg
+    images/background.png
 
 RESOURCES += \
     resource.qrc

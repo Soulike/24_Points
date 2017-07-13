@@ -17,7 +17,7 @@ GameMainWindow::GameMainWindow(QWidget *parent) :
 		cards.push_back(Card());
 
 	setStyleSheet(
-				"GameMainWindow{border-image: url(:/images/background.jpg);}"
+				"GameMainWindow{border-image: url(:/images/background.png);}"
 				"QLabel{color:white;}"
 				"QGroupBox {border:hidden;}"
 				"QPushButton {background-color: rgba(255,255,255,0.8); border:1px solid gray}"
@@ -340,7 +340,12 @@ void GameMainWindow::equal()
 {
 	try
 	{
-		if(calculate(equation) - 24 < 10E11)
+		for(auto card : cards)
+			if(card.checked == false)
+			{
+				throw "每张牌必须使用一次";
+			}
+		if(fabs(calculate(equation) - 24) < 10E-11)
 		{
 			ui->score->setText(QString::number(++score));
 			ui->output->setText("恭喜你答对了！");
@@ -349,6 +354,7 @@ void GameMainWindow::equal()
 		else
 		{
 			ui->output->setText("答错了，再试试？");
+			ui->score->setText(QString::number(--score));
 		}
 		clear_equation();
 	}
